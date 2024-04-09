@@ -1,42 +1,21 @@
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
+// const APIFeatures = require('../utils/apiFeatures');
+const factory = require('./handlerFactory');
 
 exports.aliasTopTour = (req, res, next) => {
-  // console.log('AliseMiddleware Working');
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingAverage,summary,difficulty';
   next();
 };
 
-exports.getAllTour = async (req, res) => {
-  // console.log(req.query);
-  try {
-    //Execution Query
+exports.getAllTour = factory.getAll(Tour);
 
-    const features = new APIFeatures(Tour.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
+exports.createTour = factory.createOne(Tour);
 
-    // console.log('Query Call:', features.query);
-    const tours = await features.query;
+exports.updateTour = factory.updateOne(Tour);
 
-    res.status(200).json({
-      status: 'Success',
-      results: tours.length,
-      data: {
-        tours,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err.message,
-    });
-  }
-};
+exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getTour = async (req, res) => {
   // For Using Monogo Db and data creating test
@@ -56,77 +35,6 @@ exports.getTour = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: 'Invalid',
-      message: err.message,
-    });
-  }
-};
-
-// const catchAsync = (fn) => {
-//   return (req, res, next) => {
-//     fn(req, res, next).catch(next);
-//   };
-// };
-
-exports.createTour = async (req, res) => {
-  //   console.log(req.body);
-  // For Using Monogo Db and data creating test
-  // const newTour = await Tour.create(req.body);
-  // res.status(201).json({
-  //   status: 'success',
-  //   data: {
-  //     tour: newTour,
-  //   },
-  // });
-
-  // OR
-  try {
-    const newTour = await Tour.create(req.body);
-    res.status(201).json({
-      status: 'success',
-      data: {
-        tour: newTour,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err.message,
-    });
-  }
-};
-
-exports.updateTour = async (req, res) => {
-  try {
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err.message,
-    });
-  }
-};
-
-exports.deleteTour = async (req, res) => {
-  // For Using Monogo Db and data creating test
-
-  try {
-    await Tour.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success Deleted Tour',
-      data: null,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
       message: err.message,
     });
   }
@@ -213,3 +121,105 @@ exports.getMonthlyPlan = async (req, res) => {
     });
   }
 };
+
+// exports.getAllTour = async (req, res) => {
+//   // console.log(req.query);
+//   try {
+//     //Execution Query
+
+//     const features = new APIFeatures(Tour.find(), req.query)
+//       .filter()
+//       .sort()
+//       .limitFields()
+//       .paginate();
+
+//     // console.log('Query Call:', features.query);
+//     const tours = await features.query;
+
+//     res.status(200).json({
+//       status: 'Success',
+//       results: tours.length,
+//       data: {
+//         tours,
+//       },
+//     });
+//   } catch (err) {
+//     res.status(404).json({
+//       status: 'failed',
+//       message: err.message,
+//     });
+//   }
+// };
+
+// exports.getTour = factory.getOne(Tour, { path: 'reviews' });
+
+// const catchAsync = (fn) => {
+//   return (req, res, next) => {
+//     fn(req, res, next).catch(next);
+//   };
+// };
+
+// exports.createTour = async (req, res) => {
+//   //   console.log(req.body);
+//   // For Using Monogo Db and data creating test
+//   // const newTour = await Tour.create(req.body);
+//   // res.status(201).json({
+//   //   status: 'success',
+//   //   data: {
+//   //     tour: newTour,
+//   //   },
+//   // });
+
+//   // OR
+//   try {
+//     const newTour = await Tour.create(req.body);
+//     res.status(201).json({
+//       status: 'success',
+//       data: {
+//         tour: newTour,
+//       },
+//     });
+//   } catch (err) {
+//     res.status(404).json({
+//       status: 'failed',
+//       message: err.message,
+//     });
+//   }
+// };
+
+// exports.updateTour = async (req, res) => {
+//   try {
+//     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//       new: true,
+//       runValidators: true,
+//     });
+//     res.status(200).json({
+//       status: 'success',
+//       data: {
+//         tour,
+//       },
+//     });
+//   } catch (err) {
+//     res.status(404).json({
+//       status: 'failed',
+//       message: err.message,
+//     });
+//   }
+// };
+
+// exports.deleteTour = async (req, res) => {
+//   // For Using Monogo Db and data creating test
+
+//   try {
+//     await Tour.findByIdAndDelete(req.params.id);
+//     res.status(204).json({
+//       status: 'success Deleted Tour',
+//       data: null,
+//     });
+//   } catch (err) {
+//     res.status(404).json({
+//       status: 'failed',
+//       message: err.message,
+//     });
+//   }
+// };

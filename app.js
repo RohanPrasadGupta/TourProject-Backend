@@ -1,11 +1,67 @@
 const express = require('express');
 const morgan = require('morgan');
 // const AppError = require('./utils/appError');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitiza = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 const globalErrorHandler = require('./controllers/errorController');
-const app = express();
-app.use(express.json());
-app.use(morgan('dev'));
+const hpp = require('hpp');
+// Routes Below
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
+const app = express();
+// app.use(morgan('dev'));
+
+// setting up HTTP header security
+app.use(helmet());
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// Setting limit for same Api request to server
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many request. please try again later',
+});
+
+app.use('/api', limiter);
+
+// Body parser, reading data from body into rq.body
+app.use(
+  express.json({
+    limit: '10kb',
+  })
+);
+
+// Data Sanitazation against NoSQL query injection
+app.use(mongoSanitiza());
+
+// Data security against XSS
+app.use(xss());
+
+// prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingQuantity',
+      'ratingAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
+
+// Serving static files
+app.use(express.static(`${__dirname}/public`));
+
+// Test Middleware
 app.use((req, res, next) => {
   console.log(`Hellow From middleWare`);
   req.reqestTime = new Date().toISOString();
@@ -13,11 +69,9 @@ app.use((req, res, next) => {
   next();
 });
 
-const tourRouter = require('./routes/tourRoutes');
-const userRouter = require('./routes/userRoutes');
-
 app.use('/api/v1/tour', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   //   next(new AppError(`can't find ${req.originalUrl} on this server!`, 404));

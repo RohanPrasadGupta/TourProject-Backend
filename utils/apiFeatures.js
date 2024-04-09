@@ -18,6 +18,7 @@ class APIFeatures {
     this.query.find(JSON.parse(queryStr));
     return this;
   }
+
   sort() {
     if (this.queryString.sort) {
       const sortBy = this.queryString.sort.split(',').join(' ');
