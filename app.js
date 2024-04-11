@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const path = require('path');
 // const AppError = require('./utils/appError');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
@@ -11,9 +12,17 @@ const hpp = require('hpp');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
 // app.use(morgan('dev'));
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// Serving static files
+// app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // setting up HTTP header security
 app.use(helmet());
@@ -58,9 +67,6 @@ app.use(
   })
 );
 
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
-
 // Test Middleware
 app.use((req, res, next) => {
   console.log(`Hellow From middleWare`);
@@ -69,6 +75,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/', viewRouter);
 app.use('/api/v1/tour', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);

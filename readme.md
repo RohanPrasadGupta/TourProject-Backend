@@ -39,3 +39,7 @@
 - express-mongo-sanitize
 - xss-clean
 - hpp (http parameter pollution)
+
+# Rendering
+
+- Pug
